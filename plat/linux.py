@@ -10,9 +10,14 @@ def run_and_wait(view, cmd):
             "bash -c \"%s; read -p 'Press RETURN to exit.'\"" % cmd]).wait()
 
 
+def bash_escape_double_quoted_text(text):
+    return text.replace('\\', '\\\\').replace('"', '\\"').replace('$', '\\$')
+
+
 def filter_region(view, text, command):
     shell = view.settings().get('vintageex_linux_shell')
     shell = shell or os.path.expandvars("$SHELL")
-    p = subprocess.Popen([shell, '-c', 'echo "%s" | %s' % (text, command)],
+    escaped = bash_escape_double_quoted_text(text)
+    p = subprocess.Popen([shell, '-c', 'echo "%s" | %s' % (escaped, command)],
                          stdout=subprocess.PIPE)
     return p.communicate()[0][:-1]
